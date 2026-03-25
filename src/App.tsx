@@ -7,10 +7,6 @@ export default function App() {
         <Routes>
             <Route
                 path="/"
-                element={<div>Dashboard (coming soon)</div>}
-            />
-            <Route
-                path="/login"
                 element={
                     <div className="min-h-screen flex items-center justify-center bg-muted">
                         <LoginForm />

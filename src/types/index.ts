@@ -31,3 +31,30 @@ export interface Task {
     created_by: string;
     created_at: string;
 }
+
+// values for TaskStatus and TaskPriority
+export const TaskStatus = {
+    Pending: 0,
+    InProgress: 1,
+    Completed: 2,
+    Cancelled: 3,
+    Archived: 4,
+} as const;
+
+export const TaskPriority = {
+    Low: 0,
+    Medium: 1,
+    High: 2,
+    Urgent: 3,
+} as const;
+
+export const ApplianceStatus = {
+    Available: 0,
+    InUse: 1,
+} as const;
+
+// gives type of objects
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
+export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority];
+export type ApplianceStatus =
+    (typeof ApplianceStatus)[keyof typeof ApplianceStatus];
