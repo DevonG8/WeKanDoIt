@@ -15,11 +15,21 @@ import {
     FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const handleGoogleSignIn = async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+    };
+
     return (
         <div
             className={cn("flex flex-col gap-6", className)}
@@ -49,6 +59,7 @@ export function LoginForm({
                                     Login with Apple
                                 </Button>
                                 <Button
+                                    onClick={handleGoogleSignIn}
                                     variant="outline"
                                     type="button">
                                     <svg
