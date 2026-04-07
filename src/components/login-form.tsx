@@ -16,11 +16,18 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
     const handleGoogleSignIn = async () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",
@@ -29,6 +36,38 @@ export function LoginForm({
             },
         });
     };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setError(error.message);
+        } else {
+            setSuccess(true);
+        }
+    };
+
+    if (success) {
+        return (
+            <div
+                className={cn(
+                    "flex flex-col items-center gap-2 rounded-md border bg-muted p-4",
+                    className,
+                )}
+                {...props}>
+                <h3 className="text-lg font-semibold">Sign in successful!</h3>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -42,7 +81,7 @@ export function LoginForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleSubmit}>
                         <FieldGroup>
                             <Field>
                                 <Button
@@ -82,6 +121,8 @@ export function LoginForm({
                                     id="email"
                                     type="email"
                                     placeholder="m@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
                             </Field>
@@ -99,11 +140,24 @@ export function LoginForm({
                                 <Input
                                     id="password"
                                     type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     required
                                 />
                             </Field>
+                            {error && (
+                                <p className="text-sm text-destructive text-center">
+                                    {error}
+                                </p>
+                            )}
                             <Field>
-                                <Button type="submit">Login</Button>
+                                <Button
+                                    type="submit"
+                                    disabled={loading}>
+                                    {loading ? "Logging in…" : "Login"}
+                                </Button>
                                 <FieldDescription className="text-center">
                                     Don&apos;t have an account?{" "}
                                     <a href="/signup">Sign up</a>

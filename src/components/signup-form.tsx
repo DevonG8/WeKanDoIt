@@ -14,11 +14,74 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import {
+    Alert,
+    AlertAction,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert";
+import { CheckCircle2Icon } from "lucide-react";
 
 export function SignupForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError("");
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters.");
+            return;
+        }
+
+        setLoading(true);
+
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { full_name: name },
+            },
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setError(error.message);
+        } else {
+            setSuccess(true);
+        }
+
+        if (success) {
+            return (
+                <Alert className="max-w-md">
+                    <CheckCircle2Icon />
+                    <AlertTitle>Account created successfully!</AlertTitle>
+                    <AlertDescription>
+                        Your account has been created. Please check your email
+                        to verify your account before logging in. Thank you!!
+                    </AlertDescription>
+                </Alert>
+            );
+        }
+    };
+
     return (
         <div
             className={cn("flex flex-col gap-6", className)}
@@ -33,7 +96,8 @@ export function SignupForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleSubmit}>
+                        {" "}
                         <FieldGroup>
                             <Field>
                                 <FieldLabel htmlFor="name">
@@ -44,6 +108,8 @@ export function SignupForm({
                                     type="text"
                                     placeholder="John Doe"
                                     required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                 />
                             </Field>
                             <Field>
@@ -53,6 +119,8 @@ export function SignupForm({
                                     type="email"
                                     placeholder="m@example.com"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </Field>
                             <Field>
@@ -65,6 +133,10 @@ export function SignupForm({
                                             id="password"
                                             type="password"
                                             required
+                                            value={password}
+                                            onChange={(e) =>
+                                                setPassword(e.target.value)
+                                            }
                                         />
                                     </Field>
                                     <Field>
@@ -75,6 +147,12 @@ export function SignupForm({
                                             id="confirm-password"
                                             type="password"
                                             required
+                                            value={confirmPassword}
+                                            onChange={(e) =>
+                                                setConfirmPassword(
+                                                    e.target.value,
+                                                )
+                                            }
                                         />
                                     </Field>
                                 </Field>
@@ -82,8 +160,19 @@ export function SignupForm({
                                     Must be at least 8 characters long.
                                 </FieldDescription>
                             </Field>
+                            {error && (
+                                <p className="text-sm text-red-500 text-center">
+                                    {error}
+                                </p>
+                            )}
                             <Field>
-                                <Button type="submit">Create Account</Button>
+                                <Button
+                                    type="submit"
+                                    disabled={loading}>
+                                    {loading
+                                        ? "Creating account..."
+                                        : "Create Account"}
+                                </Button>
                                 <FieldDescription className="text-center">
                                     Already have an account?{" "}
                                     <a href="/">Sign in</a>
