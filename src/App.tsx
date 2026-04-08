@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import LoginPage from "@/pages/login";
-import SignupPage from "@/pages/signup";
+import LoginPage from "@/pages/Login";
+import SignupPage from "@/pages/Signup";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/dashboard";
 // add when protected routes are added
