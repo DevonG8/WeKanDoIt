@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function LoginForm({
     className,
@@ -26,7 +27,8 @@ export function LoginForm({
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleGoogleSignIn = async () => {
         await supabase.auth.signInWithOAuth({
@@ -52,22 +54,9 @@ export function LoginForm({
         if (error) {
             setError(error.message);
         } else {
-            setSuccess(true);
+            navigate("/dashboard");
         }
     };
-
-    if (success) {
-        return (
-            <div
-                className={cn(
-                    "flex flex-col items-center gap-2 rounded-md border bg-muted p-4",
-                    className,
-                )}
-                {...props}>
-                <h3 className="text-lg font-semibold">Sign in successful!</h3>
-            </div>
-        );
-    }
 
     return (
         <div

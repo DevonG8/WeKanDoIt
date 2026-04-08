@@ -1,20 +1,99 @@
+import * as React from "react";
+
+import { Calendars } from "@/components/calendars";
+import { DatePicker } from "@/components/date-picker";
+import { NavUser } from "@/components/nav-user";
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarGroup,
     SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
+    SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { PlusIcon } from "@phosphor-icons/react";
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
-export function AppSidebar() {
+// This is sample data.
+const data = {
+    user: {
+        name: "shadcn",
+        email: "m@example.com",
+        avatar: "/avatars/shadcn.jpg",
+    },
+    calendars: [
+        {
+            name: "My Calendars",
+            items: ["Personal", "Work", "Family"],
+        },
+        {
+            name: "Favorites",
+            items: ["Holidays", "Birthdays"],
+        },
+        {
+            name: "Other",
+            items: ["Travel", "Reminders", "Deadlines"],
+        },
+    ],
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const [userData, setUserData] = useState({
+        name: "Loading...",
+        email: "",
+        avatar: "",
+    });
+
+    useEffect(() => {
+        async function fetchUser() {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("name, email, picture")
+                    .eq("id", user.id)
+                    .single();
+
+                if (profile) {
+                    setUserData({
+                        name: profile.name || "User",
+                        email: profile.email || user.email || "",
+                        avatar: profile.picture || "",
+                    });
+                }
+            }
+        }
+        fetchUser();
+    }, []);
+
     return (
-        <Sidebar>
-            <SidebarHeader />
+        <Sidebar {...props}>
+            <SidebarHeader className="h-16 border-b border-sidebar-border">
+                <NavUser user={userData} />
+            </SidebarHeader>
             <SidebarContent>
-                <SidebarGroup />
-                <SidebarGroup />
+                <DatePicker />
+                <SidebarSeparator className="mx-0" />
+                <Calendars calendars={data.calendars} />
             </SidebarContent>
-            <SidebarFooter />
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton>
+                            <PlusIcon />
+                            <span>New Calendar</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     );
 }

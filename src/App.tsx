@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import { LoginForm } from "@/components/login-form";
-import { SignupForm } from "@/components/signup-form";
+import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/dashboard";
 // add when protected routes are added
@@ -13,7 +13,7 @@ export default function App() {
                 path="/"
                 element={
                     <div className="min-h-screen flex items-center justify-center bg-muted">
-                        <LoginForm />
+                        <LoginPage />
                     </div>
                 }
             />
@@ -21,7 +21,7 @@ export default function App() {
                 path="/signup"
                 element={
                     <div className="min-h-screen flex items-center justify-center bg-muted">
-                        <SignupForm />
+                        <SignupPage />
                     </div>
                 }
             />
