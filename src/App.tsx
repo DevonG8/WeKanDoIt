@@ -4,7 +4,7 @@ import SignupPage from "@/pages/Signup";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/dashboard";
 // add when protected routes are added
-// import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function App() {
     return (
@@ -32,9 +32,11 @@ export default function App() {
             <Route
                 path="/dashboard"
                 element={
-                    <div className="min-h-screen flex items-center justify-center bg-muted">
-                        <Dashboard />
-                    </div>
+                    <ProtectedRoute>
+                        <div className="min-h-screen flex items-center justify-center bg-muted">
+                            <Dashboard />
+                        </div>
+                    </ProtectedRoute>
                 }
             />
         </Routes>

@@ -1,8 +1,11 @@
 import * as React from "react";
+import { useEffect, useState } from "react";
 
 import { Calendars } from "@/components/calendars";
 import { DatePicker } from "@/components/date-picker";
 import { NavUser } from "@/components/nav-user";
+import { TaskModal } from "@/components/task-modal";
+import { HouseholdModal } from "@/components/household-modal";
 import {
     Sidebar,
     SidebarContent,
@@ -14,32 +17,14 @@ import {
     SidebarRail,
     SidebarSeparator,
 } from "@/components/ui/sidebar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PlusIcon } from "@phosphor-icons/react";
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
-
-// This is sample data.
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    calendars: [
-        {
-            name: "My Calendars",
-            items: ["Personal", "Work", "Family"],
-        },
-        {
-            name: "Favorites",
-            items: ["Holidays", "Birthdays"],
-        },
-        {
-            name: "Other",
-            items: ["Travel", "Reminders", "Deadlines"],
-        },
-    ],
-};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const [userData, setUserData] = useState({
@@ -48,29 +33,77 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
     });
 
+    const [calendarData, setCalendarData] = useState([
+        {
+            name: "Board View",
+            items: ["Board", "My Tasks", "Calendar"],
+        },
+        {
+            name: "Households",
+            items: [] as string[],
+        },
+    ]);
+
+    const [taskModalOpen, setTaskModalOpen] = useState(false);
+    const [householdModalOpen, setHouseholdModalOpen] = useState(false);
+
     useEffect(() => {
         async function fetchUser() {
             const {
                 data: { user },
+                error: authError,
             } = await supabase.auth.getUser();
+            if (authError || !user) return;
 
-            if (user) {
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("name, email, picture")
-                    .eq("id", user.id)
-                    .single();
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("name, email, picture")
+                .eq("id", user.id)
+                .single();
 
-                if (profile) {
-                    setUserData({
-                        name: profile.name || "User",
-                        email: profile.email || user.email || "",
-                        avatar: profile.picture || "",
-                    });
-                }
+            if (profile) {
+                setUserData({
+                    name: profile.name || "User",
+                    email: profile.email || user.email || "",
+                    avatar: profile.picture || "",
+                });
             }
         }
         fetchUser();
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function fetchCalendars() {
+            const {
+                data: { user },
+                error: authError,
+            } = await supabase.auth.getUser();
+            if (authError || !user) return;
+
+            const { data: households, error: dbError } = await supabase
+                .from("households")
+                .select("name")
+                .eq("user_id", user.id);
+
+            if (dbError || !households) return;
+
+            if (!cancelled) {
+                setCalendarData((prev) =>
+                    prev.map((cal) =>
+                        cal.name === "Households"
+                            ? { ...cal, items: households.map((h) => h.name) }
+                            : cal,
+                    ),
+                );
+            }
+        }
+
+        fetchCalendars();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     return (
@@ -81,18 +114,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent>
                 <DatePicker />
                 <SidebarSeparator className="mx-0" />
-                <Calendars calendars={data.calendars} />
+                <Calendars calendars={calendarData} />
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton>
-                            <PlusIcon />
-                            <span>New Calendar</span>
-                        </SidebarMenuButton>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton>
+                                    <PlusIcon />
+                                    <span>New</span>
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="top"
+                                className="w-48">
+                                <DropdownMenuItem
+                                    onSelect={() => setTaskModalOpen(true)}>
+                                    New Task
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onSelect={() =>
+                                        setHouseholdModalOpen(true)
+                                    }>
+                                    New Household
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
+
+            <TaskModal
+                open={taskModalOpen}
+                onClose={() => setTaskModalOpen(false)}
+            />
+            <HouseholdModal
+                open={householdModalOpen}
+                onClose={() => setHouseholdModalOpen(false)}
+            />
+
             <SidebarRail />
         </Sidebar>
     );
