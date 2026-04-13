@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export function TaskModal({
@@ -33,6 +33,25 @@ export function TaskModal({
     const [dueDate, setDueDate] = useState("");
     const [priority, setPriority] = useState("medium");
     const [loading, setLoading] = useState(false);
+    const [Household, setHousehold] = useState(
+        [] as { id: string; name: string }[],
+    );
+
+    useEffect(() => {
+        async function fetchHouseholds() {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (user) {
+                const { data: households } = await supabase
+                    .from("households")
+                    .select("id, name")
+                    .eq("user_id", user.id);
+                setHousehold(households || []);
+            }
+        }
+        fetchHouseholds();
+    }, [open]);
 
     if (!open) return null;
 
@@ -77,6 +96,27 @@ export function TaskModal({
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="task-priority">
+                                Choose Household
+                            </Label>
+                            <Select
+                                value={priority}
+                                onValueChange={setPriority}>
+                                <SelectTrigger id="task-priority">
+                                    <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Household.map((household) => (
+                                        <SelectItem
+                                            key={household.id}
+                                            value={household.id}>
+                                            {household.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="task-title">Title</Label>
                             <Input

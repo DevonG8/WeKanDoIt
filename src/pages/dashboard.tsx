@@ -6,7 +6,9 @@ export default function Dashboard() {
         <SidebarProvider>
             <div className="min-h-screen flex w-full items-center justify-center">
                 <AppSidebar />
-                <h1 className="text-2xl font-bold">Welcome to the Dashboard!</h1>
+                <h1 className="text-2xl font-bold">
+                    Welcome to the Dashboard!
+                </h1>
             </div>
         </SidebarProvider>
     );
