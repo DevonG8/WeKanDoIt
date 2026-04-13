@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Field,
+    FieldContent,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+} from "@/components/ui/field";
 import {
     Select,
     SelectContent,
@@ -32,26 +40,49 @@ export function TaskModal({
     const [description, setDescription] = useState("");
     const [dueDate, setDueDate] = useState("");
     const [priority, setPriority] = useState("medium");
+    const [householdId, setHouseholdId] = useState("");
     const [loading, setLoading] = useState(false);
-    const [Household, setHousehold] = useState(
-        [] as { id: string; name: string }[],
-    );
+    const [households, setHouseholds] = useState<
+        { id: string; name: string }[]
+    >([]);
+    const [applianceChecked, setApplianceChecked] = useState(false);
+    const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
+        if (!open) return;
         async function fetchHouseholds() {
             const {
                 data: { user },
             } = await supabase.auth.getUser();
             if (user) {
-                const { data: households } = await supabase
+                const { data } = await supabase
                     .from("households")
-                    .select("id, name")
-                    .eq("user_id", user.id);
-                setHousehold(households || []);
+                    .select("id, name");
+                setHouseholds(data ?? []);
             }
         }
         fetchHouseholds();
     }, [open]);
+
+    useEffect(() => {
+        if (!open || !householdId) return;
+        async function fetchMembers() {
+            const { data } = await supabase
+                .from("household_members")
+                .select("user_id, profiles(id, name)")
+                .eq("household_id", householdId);
+            setMembers(
+                data?.flatMap((m) =>
+                    Array.isArray(m.profiles)
+                        ? m.profiles
+                        : m.profiles
+                          ? [m.profiles]
+                          : [],
+                ) ?? [],
+            );
+        }
+        fetchMembers();
+    }, [open, householdId]);
 
     if (!open) return null;
 
@@ -66,7 +97,8 @@ export function TaskModal({
                 description,
                 due_date: dueDate || null,
                 priority,
-                user_id: user.id,
+                household_id: householdId || null,
+                created_by: user.id, // fixed from user_id
             });
         }
         setLoading(false);
@@ -74,6 +106,7 @@ export function TaskModal({
         setDescription("");
         setDueDate("");
         setPriority("medium");
+        setHouseholdId("");
         onClose();
     }
 
@@ -101,21 +134,41 @@ export function TaskModal({
                                 Choose Household
                             </Label>
                             <Select
-                                value={priority}
-                                onValueChange={setPriority}>
-                                <SelectTrigger id="task-priority">
-                                    <SelectValue placeholder="Select priority" />
+                                value={householdId}
+                                onValueChange={setHouseholdId}>
+                                {" "}
+                                <SelectTrigger id="task-household">
+                                    <SelectValue placeholder="Select household" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Household.map((household) => (
+                                    {households.map((h) => (
                                         <SelectItem
-                                            key={household.id}
-                                            value={household.id}>
-                                            {household.name}
+                                            key={h.id}
+                                            value={h.id}>
+                                            {h.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <FieldGroup className=" w-72">
+                                <Field orientation="horizontal">
+                                    <Checkbox
+                                        id="terms-checkbox-desc"
+                                        name="terms-checkbox-desc"
+                                        defaultChecked
+                                    />
+                                    <FieldContent>
+                                        <FieldLabel htmlFor="terms-checkbox-desc">
+                                            Appliance
+                                        </FieldLabel>
+                                        <FieldDescription>
+                                            Add an appliance to this task.
+                                        </FieldDescription>
+                                    </FieldContent>
+                                </Field>
+                            </FieldGroup>
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="task-title">Title</Label>
@@ -145,6 +198,26 @@ export function TaskModal({
                                 value={dueDate}
                                 onChange={(e) => setDueDate(e.target.value)}
                             />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="task-priority">Assign To</Label>
+                            <Select
+                                value={householdId}
+                                onValueChange={setHouseholdId}>
+                                {" "}
+                                <SelectTrigger id="task-household">
+                                    <SelectValue placeholder="Select User" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {members.map((member) => (
+                                        <SelectItem
+                                            key={member.id}
+                                            value={member.id}>
+                                            {member.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="task-priority">Priority</Label>
