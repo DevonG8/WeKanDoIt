@@ -45,7 +45,7 @@ export function TaskModal({
     const [households, setHouseholds] = useState<
         { id: string; name: string }[]
     >([]);
-    const [applianceChecked, setApplianceChecked] = useState(false);
+    // const [applianceChecked, setApplianceChecked] = useState(false);
     const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
@@ -98,7 +98,7 @@ export function TaskModal({
                 due_date: dueDate || null,
                 priority,
                 household_id: householdId || null,
-                created_by: user.id, // fixed from user_id
+                created_by: user.id,
             });
         }
         setLoading(false);
@@ -152,6 +152,9 @@ export function TaskModal({
                             </Select>
                         </div>
                         <div className="flex flex-col gap-2">
+                            <Label htmlFor="task-priority">
+                                Choose Appliance
+                            </Label>
                             <FieldGroup className=" w-72">
                                 <Field orientation="horizontal">
                                     <Checkbox

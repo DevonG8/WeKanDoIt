@@ -1,11 +1,14 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
+"use client";
 
-import { Calendars } from "@/components/calendars";
-import { DatePicker } from "@/components/date-picker";
-import { NavUser } from "@/components/nav-user";
-import { TaskModal } from "@/components/task-modal";
-import { HouseholdModal } from "@/components/household-modal";
+import * as React from "react";
+import { useEffect, useState, useCallback } from "react";
+import { Households, type Household } from "@/components/navbar/HouseholdList";
+import { DatePicker } from "@/components/navbar/date-picker";
+import { NavUser } from "@/components/navbar/nav-user";
+import { TaskModal } from "@/components/navbar/task-modal";
+import { HouseholdModal } from "@/components/navbar/household-modal";
+import { JoinHouseholdModal } from "@/components/navbar/join-household-modal";
+
 import {
     Sidebar,
     SidebarContent,
@@ -16,15 +19,27 @@ import {
     SidebarMenuItem,
     SidebarRail,
     SidebarSeparator,
+    SidebarTrigger
 } from "@/components/ui/sidebar";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { PlusIcon } from "@phosphor-icons/react";
+
 import { supabase } from "@/lib/supabase";
+
+interface HouseholdMemberResponse {
+    households: {
+        id: string;
+        name: string;
+        household_members: { user_id: string }[];
+    } | null;
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const [userData, setUserData] = useState({
@@ -33,27 +48,58 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
     });
 
-    const [calendarData, setCalendarData] = useState([
-        {
-            name: "Board View",
-            items: ["Board", "My Tasks", "Calendar"],
-        },
-        {
-            name: "Households",
-            items: [] as string[],
-        },
-    ]);
+    const [households, setHouseholds] = useState<Household[]>([]);
 
+    // Modal states
     const [taskModalOpen, setTaskModalOpen] = useState(false);
     const [householdModalOpen, setHouseholdModalOpen] = useState(false);
+    const [joinHouseholdModalOpen, setJoinHouseholdModalOpen] = useState(false);
+
+    //gettings households for dropdown
+    const fetchHouseholds = useCallback(async () => {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from("household_members")
+            .select(
+                `
+        households (
+          id,
+          name,
+          household_members ( user_id )
+        )
+      `,
+            )
+            .eq("user_id", user.id);
+
+        if (error) {
+            console.error("Error fetching households:", error);
+            return;
+        }
+
+        const typedData = data as unknown as HouseholdMemberResponse[];
+
+        const mapped: Household[] = typedData
+            .filter((row) => row.households !== null)
+            .map((row) => ({
+                id: row.households!.id,
+                name: row.households!.name,
+                member_count: row.households!.household_members.length,
+            }));
+
+        setHouseholds(mapped);
+    }, []);
 
     useEffect(() => {
-        async function fetchUser() {
+        // Initial fetch for user and households
+        async function init() {
             const {
                 data: { user },
-                error: authError,
             } = await supabase.auth.getUser();
-            if (authError || !user) return;
+            if (!user) return;
 
             const { data: profile } = await supabase
                 .from("profiles")
@@ -68,54 +114,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     avatar: profile.picture || "",
                 });
             }
+            fetchHouseholds();
         }
-        fetchUser();
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        async function fetchCalendars() {
-            const {
-                data: { user },
-                error: authError,
-            } = await supabase.auth.getUser();
-            if (authError || !user) return;
-
-            const { data: households, error: dbError } = await supabase
-                .from("households")
-                .select("name")
-                .eq("user_id", user.id);
-
-            if (dbError || !households) return;
-
-            if (!cancelled) {
-                setCalendarData((prev) =>
-                    prev.map((cal) =>
-                        cal.name === "Households"
-                            ? { ...cal, items: households.map((h) => h.name) }
-                            : cal,
-                    ),
-                );
-            }
-        }
-
-        fetchCalendars();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+        init();
+    }, [fetchHouseholds]);
 
     return (
         <Sidebar {...props}>
             <SidebarHeader className="h-16 border-b border-sidebar-border">
                 <NavUser user={userData} />
             </SidebarHeader>
+
             <SidebarContent>
                 <DatePicker />
                 <SidebarSeparator className="mx-0" />
-                <Calendars calendars={calendarData} />
+                <Households households={households} />
             </SidebarContent>
+
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -139,21 +154,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     }>
                                     New Household
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onSelect={() =>
+                                        setJoinHouseholdModalOpen(true)
+                                    }>
+                                    Join Household
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
 
+            {/* Modals */}
             <TaskModal
                 open={taskModalOpen}
                 onClose={() => setTaskModalOpen(false)}
             />
             <HouseholdModal
                 open={householdModalOpen}
-                onClose={() => setHouseholdModalOpen(false)}
+                onClose={() => {
+                    setHouseholdModalOpen(false);
+                    fetchHouseholds();
+                }}
             />
-
+            <JoinHouseholdModal
+                open={joinHouseholdModalOpen}
+                onClose={() => {
+                    setJoinHouseholdModalOpen(false);
+                    fetchHouseholds();
+                }}
+            />
             <SidebarRail />
         </Sidebar>
     );
