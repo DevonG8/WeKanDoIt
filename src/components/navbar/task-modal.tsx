@@ -11,14 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Field,
-    FieldContent,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
 import {
     Select,
     SelectContent,
@@ -28,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { TaskStatus, TaskPriority } from "@/types/index"; // regular import, not type
+import type { TaskPriorityValue } from "@/types/index";
 
 export function TaskModal({
     open,
@@ -39,13 +33,15 @@ export function TaskModal({
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [dueDate, setDueDate] = useState("");
-    const [priority, setPriority] = useState("medium");
+    const [priority, setPriority] = useState<TaskPriorityValue>(
+        TaskPriority.Medium,
+    );
     const [householdId, setHouseholdId] = useState("");
+    const [assignedTo, setAssignedTo] = useState("");
     const [loading, setLoading] = useState(false);
     const [households, setHouseholds] = useState<
         { id: string; name: string }[]
     >([]);
-    // const [applianceChecked, setApplianceChecked] = useState(false);
     const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
@@ -86,27 +82,35 @@ export function TaskModal({
 
     if (!open) return null;
 
+    function reset() {
+        setTitle("");
+        setDescription("");
+        setDueDate("");
+        setPriority(TaskPriority.Medium);
+        setHouseholdId("");
+        setAssignedTo("");
+    }
+
     async function handleCreate() {
         setLoading(true);
         const {
             data: { user },
         } = await supabase.auth.getUser();
         if (user) {
-            await supabase.from("tasks").insert({
+            const { error } = await supabase.from("tasks").insert({
                 title,
                 description,
                 due_date: dueDate || null,
                 priority,
+                status: TaskStatus.backlog,
                 household_id: householdId || null,
+                assigned_to: assignedTo || null,
                 created_by: user.id,
             });
+            if (error) console.error("Error creating task:", error);
         }
         setLoading(false);
-        setTitle("");
-        setDescription("");
-        setDueDate("");
-        setPriority("medium");
-        setHouseholdId("");
+        reset();
         onClose();
     }
 
@@ -130,14 +134,11 @@ export function TaskModal({
                 <CardContent>
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
-                            <Label htmlFor="task-priority">
-                                Choose Household
-                            </Label>
+                            <Label>Choose Household</Label>
                             <Select
                                 value={householdId}
                                 onValueChange={setHouseholdId}>
-                                {" "}
-                                <SelectTrigger id="task-household">
+                                <SelectTrigger>
                                     <SelectValue placeholder="Select household" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -150,28 +151,6 @@ export function TaskModal({
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="task-priority">
-                                Choose Appliance
-                            </Label>
-                            <FieldGroup className=" w-72">
-                                <Field orientation="horizontal">
-                                    <Checkbox
-                                        id="terms-checkbox-desc"
-                                        name="terms-checkbox-desc"
-                                        defaultChecked
-                                    />
-                                    <FieldContent>
-                                        <FieldLabel htmlFor="terms-checkbox-desc">
-                                            Appliance
-                                        </FieldLabel>
-                                        <FieldDescription>
-                                            Add an appliance to this task.
-                                        </FieldDescription>
-                                    </FieldContent>
-                                </Field>
-                            </FieldGroup>
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="task-title">Title</Label>
@@ -203,13 +182,12 @@ export function TaskModal({
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Label htmlFor="task-priority">Assign To</Label>
+                            <Label>Assign To</Label>
                             <Select
-                                value={householdId}
-                                onValueChange={setHouseholdId}>
-                                {" "}
-                                <SelectTrigger id="task-household">
-                                    <SelectValue placeholder="Select User" />
+                                value={assignedTo}
+                                onValueChange={setAssignedTo}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select user" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {members.map((member) => (
@@ -223,19 +201,32 @@ export function TaskModal({
                             </Select>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Label htmlFor="task-priority">Priority</Label>
+                            <Label>Priority</Label>
                             <Select
-                                value={priority}
-                                onValueChange={setPriority}>
-                                <SelectTrigger id="task-priority">
+                                value={String(priority)}
+                                onValueChange={(v) =>
+                                    setPriority(Number(v) as TaskPriorityValue)
+                                }>
+                                <SelectTrigger>
                                     <SelectValue placeholder="Select priority" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="low">Low</SelectItem>
-                                    <SelectItem value="medium">
+                                    <SelectItem
+                                        value={String(TaskPriority.Low)}>
+                                        Low
+                                    </SelectItem>
+                                    <SelectItem
+                                        value={String(TaskPriority.Medium)}>
                                         Medium
                                     </SelectItem>
-                                    <SelectItem value="high">High</SelectItem>
+                                    <SelectItem
+                                        value={String(TaskPriority.High)}>
+                                        High
+                                    </SelectItem>
+                                    <SelectItem
+                                        value={String(TaskPriority.Urgent)}>
+                                        Urgent
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -244,7 +235,10 @@ export function TaskModal({
                 <CardFooter className="flex justify-end gap-2">
                     <Button
                         variant="outline"
-                        onClick={onClose}>
+                        onClick={() => {
+                            reset();
+                            onClose();
+                        }}>
                         Cancel
                     </Button>
                     <Button

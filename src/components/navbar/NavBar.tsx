@@ -19,7 +19,6 @@ import {
     SidebarMenuItem,
     SidebarRail,
     SidebarSeparator,
-    SidebarTrigger
 } from "@/components/ui/sidebar";
 
 import {
@@ -41,7 +40,16 @@ interface HouseholdMemberResponse {
     } | null;
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+    selectedHouseholdId: string | null;
+    onSelectHousehold: (id: string | null) => void;
+}
+
+export function AppSidebar({
+    selectedHouseholdId,
+    onSelectHousehold,
+    ...props
+}: AppSidebarProps) {
     const [userData, setUserData] = useState({
         name: "Loading...",
         email: "",
@@ -91,10 +99,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             }));
 
         setHouseholds(mapped);
-    }, []);
+
+        if (mapped.length > 0 && !selectedHouseholdId) {
+            onSelectHousehold(mapped[0].id);
+        } else if (mapped.length > 0 && selectedHouseholdId) {
+            if (!mapped.some((h) => h.id === selectedHouseholdId)) {
+                onSelectHousehold(mapped[0].id);
+            }
+        } else if (mapped.length === 0) {
+            onSelectHousehold(null);
+        }
+    }, [selectedHouseholdId, onSelectHousehold]);
 
     useEffect(() => {
-        // Initial fetch for user and households
         async function init() {
             const {
                 data: { user },
@@ -128,7 +145,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent>
                 <DatePicker />
                 <SidebarSeparator className="mx-0" />
-                <Households households={households} />
+                <Households
+                    households={households}
+                    selectedId={selectedHouseholdId}
+                    onSelect={onSelectHousehold}
+                />
             </SidebarContent>
 
             <SidebarFooter>

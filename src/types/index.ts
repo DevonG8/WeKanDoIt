@@ -30,15 +30,17 @@ export interface Task {
     completed_at?: string;
     created_by: string;
     created_at: string;
+    status: TaskStatus;
+    priority: TaskPriority;
 }
 
 // values for TaskStatus and TaskPriority
 export const TaskStatus = {
-    Pending: 0,
-    InProgress: 1,
-    Completed: 2,
-    Cancelled: 3,
-    Archived: 4,
+    backlog: 0,
+    next: 1,
+    inProgress: 2,
+    pending: 3,
+    finished: 4,
 } as const;
 
 export const TaskPriority = {
@@ -58,3 +60,5 @@ export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority];
 export type ApplianceStatus =
     (typeof ApplianceStatus)[keyof typeof ApplianceStatus];
+export type TaskPriorityValue =
+    (typeof TaskPriority)[keyof typeof TaskPriority];

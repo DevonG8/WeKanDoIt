@@ -25,9 +25,11 @@ export interface Household {
 
 interface HouseholdsProps {
     households: Household[];
+    selectedId: string | null;
+    onSelect: (id: string) => void;
 }
 
-export function Households({ households }: HouseholdsProps) {
+export function Households({ households, selectedId, onSelect }: HouseholdsProps) {
     return (
         <>
             <SidebarGroup>
@@ -47,9 +49,13 @@ export function Households({ households }: HouseholdsProps) {
                             <SidebarMenu>
                                 {households.map((household) => (
                                     <SidebarMenuItem key={household.id}>
-                                        <SidebarMenuButton>
+                                        <SidebarMenuButton
+                                            isActive={selectedId === household.id}
+                                            onClick={() => onSelect(household.id)}>
                                             <div className="group/calendar-item flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground">
-                                                <CheckIcon className="size-3" />
+                                                {selectedId === household.id && (
+                                                    <CheckIcon className="size-3" />
+                                                )}
                                             </div>
                                             <span className="truncate">
                                                 {household.name}
