@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     CardHeader,
     CardTitle,
@@ -7,24 +7,47 @@ import {
     CardContent,
 } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Task } from "@/types/index";
 import { TaskStatus } from "@/types/index";
 import { TaskCard } from "@/components/Dashboard/taskCard";
+import { ClickedTaskCard } from "@/components/Dashboard/clickedTaskCard";
+import { useAnimatedColumn } from "@/hooks/useAnimateColumn";
 
 interface ColumnsProps {
     householdId: string | null;
+    children?: React.ReactNode;
 }
 
 export function Columns({ householdId }: ColumnsProps) {
-    const [backlogOpen, setBacklogOpen] = useState(true);
-    const [NextOpen, setNextOpen] = useState(true);
-    const [inProgressOpen, setInProgressOpen] = useState(true);
-    const [pendingOpen, setPendingOpen] = useState(true);
-    const [finishedOpen, setFinishedOpen] = useState(true);
     const [loading, setLoading] = useState(false);
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const {
+        columnRef: backlogRef,
+        toggleColumn: toggleBacklog,
+        isOpen: backlogOpen,
+    } = useAnimatedColumn();
+    const {
+        columnRef: nextRef,
+        toggleColumn: toggleNext,
+        isOpen: nextOpen,
+    } = useAnimatedColumn();
+    const {
+        columnRef: inProgressRef,
+        toggleColumn: toggleInProgress,
+        isOpen: inProgressOpen,
+    } = useAnimatedColumn();
+    const {
+        columnRef: pendingRef,
+        toggleColumn: togglePending,
+        isOpen: pendingOpen,
+    } = useAnimatedColumn();
+    const {
+        columnRef: finishedRef,
+        toggleColumn: toggleFinished,
+        isOpen: finishedOpen,
+    } = useAnimatedColumn();
 
     useEffect(() => {
         console.log("useEffect fired with householdId:", householdId);
@@ -69,7 +92,7 @@ export function Columns({ householdId }: ColumnsProps) {
                 }`}>
                 {!backlogOpen && (
                     <button
-                        onClick={() => setBacklogOpen(true)}
+                        onClick={toggleBacklog}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
                         <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
                             {"Backlog"} ({backlogTasks.length}){" "}
@@ -79,6 +102,7 @@ export function Columns({ householdId }: ColumnsProps) {
                 )}
 
                 <div
+                    ref={backlogRef}
                     className={`flex flex-col h-full transition-opacity duration-200 ${
                         backlogOpen
                             ? "opacity-100"
@@ -92,12 +116,11 @@ export function Columns({ householdId }: ColumnsProps) {
                                     Tasks you have not yet started.
                                 </CardDescription>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setBacklogOpen(false)}>
-                                <ChevronLeft size={16} />
-                            </Button>
+                            <button
+                                onClick={() => toggleBacklog()}
+                                className="...">
+                                <span>...</span>
+                            </button>
                         </div>
                     </CardHeader>
 
@@ -111,6 +134,7 @@ export function Columns({ householdId }: ColumnsProps) {
                                 <TaskCard
                                     key={task.id}
                                     task={task}
+                                    onTaskClick={setSelectedTask}
                                 />
                             ))
                         )}
@@ -121,22 +145,23 @@ export function Columns({ householdId }: ColumnsProps) {
             {/* Next Column */}
             <div
                 className={`relative h-[80vh] transition-all duration-500 ease-in-out overflow-hidden rounded-xl border bg-card ${
-                    NextOpen ? "flex-1 min-w-0" : "w-10 flex-none"
+                    nextOpen ? "flex-1 min-w-0" : "w-10 flex-none"
                 }`}>
-                {!NextOpen && (
+                {!nextOpen && (
                     <button
-                        onClick={() => setNextOpen(true)}
+                        onClick={toggleNext}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
                         <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
-                            {"Next"} ({nextTasks.length})
+                            {"Next"} ({nextTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
                     </button>
                 )}
 
                 <div
-                    className={`flex flex-col h-full transition-opacity duration-200 ${
-                        NextOpen
+                    ref={nextRef}
+                    className={`    flex flex-col h-full transition-opacity duration-200 ${
+                        nextOpen
                             ? "opacity-100"
                             : "opacity-0 pointer-events-none"
                     }`}>
@@ -151,7 +176,7 @@ export function Columns({ householdId }: ColumnsProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setNextOpen(false)}>
+                                onClick={() => toggleNext()}>
                                 <ChevronLeft size={16} />
                             </Button>
                         </div>
@@ -166,7 +191,8 @@ export function Columns({ householdId }: ColumnsProps) {
                             nextTasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="rounded-md border p-2 text-sm bg-background">
+                                    onClick={() => setSelectedTask(task)}
+                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
                                     <div className="font-semibold">
                                         {task.title}
                                     </div>
@@ -189,16 +215,17 @@ export function Columns({ householdId }: ColumnsProps) {
                 }`}>
                 {!inProgressOpen && (
                     <button
-                        onClick={() => setInProgressOpen(true)}
+                        onClick={toggleInProgress}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
                         <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
-                            {"In Progress"} ({inProgressTasks.length})
+                            {"In Progress"} ({inProgressTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
                     </button>
                 )}
 
                 <div
+                    ref={inProgressRef}
                     className={`flex flex-col h-full transition-opacity duration-200 ${
                         inProgressOpen
                             ? "opacity-100"
@@ -215,7 +242,8 @@ export function Columns({ householdId }: ColumnsProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setInProgressOpen(false)}>
+                                onClick={() => toggleInProgress()}>
+                                {" "}
                                 <ChevronLeft size={16} />
                             </Button>
                         </div>
@@ -230,7 +258,8 @@ export function Columns({ householdId }: ColumnsProps) {
                             inProgressTasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="rounded-md border p-2 text-sm bg-background">
+                                    onClick={() => setSelectedTask(task)}
+                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
                                     <div className="font-semibold">
                                         {task.title}
                                     </div>
@@ -253,16 +282,17 @@ export function Columns({ householdId }: ColumnsProps) {
                 }`}>
                 {!pendingOpen && (
                     <button
-                        onClick={() => setPendingOpen(true)}
+                        onClick={togglePending}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
                         <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
-                            {"Pending Review"} ({pendingTasks.length})
+                            {"Pending Review"} ({pendingTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
                     </button>
                 )}
 
                 <div
+                    ref={pendingRef}
                     className={`flex flex-col h-full transition-opacity duration-200 ${
                         pendingOpen
                             ? "opacity-100"
@@ -279,7 +309,7 @@ export function Columns({ householdId }: ColumnsProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setPendingOpen(false)}>
+                                onClick={() => togglePending()}>
                                 <ChevronLeft size={16} />
                             </Button>
                         </div>
@@ -294,7 +324,8 @@ export function Columns({ householdId }: ColumnsProps) {
                             pendingTasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="rounded-md border p-2 text-sm bg-background">
+                                    onClick={() => setSelectedTask(task)}
+                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
                                     <div className="font-semibold">
                                         {task.title}
                                     </div>
@@ -317,16 +348,17 @@ export function Columns({ householdId }: ColumnsProps) {
                 }`}>
                 {!finishedOpen && (
                     <button
-                        onClick={() => setFinishedOpen(true)}
+                        onClick={toggleFinished}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
                         <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
-                            {"Finished"} ({finishedTasks.length})
+                            {"Finished"} ({finishedTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
                     </button>
                 )}
 
                 <div
+                    ref={finishedRef}
                     className={`flex flex-col h-full transition-opacity duration-200 ${
                         finishedOpen
                             ? "opacity-100"
@@ -343,7 +375,7 @@ export function Columns({ householdId }: ColumnsProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setFinishedOpen(false)}>
+                                onClick={() => toggleFinished()}>
                                 <ChevronLeft size={16} />
                             </Button>
                         </div>
@@ -358,7 +390,8 @@ export function Columns({ householdId }: ColumnsProps) {
                             finishedTasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="rounded-md border p-2 text-sm bg-background">
+                                    onClick={() => setSelectedTask(task)}
+                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
                                     <div className="font-semibold">
                                         {task.title}
                                     </div>
@@ -373,6 +406,15 @@ export function Columns({ householdId }: ColumnsProps) {
                     </CardContent>
                 </div>
             </div>
+
+            {/* ClickedTaskCard Modal */}
+            {selectedTask && (
+                <ClickedTaskCard
+                    task={selectedTask}
+                    isOpen={true}
+                    onClose={() => setSelectedTask(null)}
+                />
+            )}
         </div>
     );
 }

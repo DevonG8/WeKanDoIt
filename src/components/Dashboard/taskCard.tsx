@@ -27,7 +27,13 @@ const priorityVariant: Record<
     [TaskPriority.Urgent]: "destructive",
 };
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCard({
+    task,
+    onTaskClick,
+}: {
+    task: Task;
+    onTaskClick?: (task: Task) => void;
+}) {
     const formattedDate = task.due_date
         ? new Date(task.due_date).toLocaleDateString("en-US", {
               month: "short",
@@ -39,8 +45,17 @@ export function TaskCard({ task }: { task: Task }) {
         ? new Date(task.due_date) < new Date()
         : false;
 
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("taskId", task.id.toString());
+    };
+
     return (
-        <Card className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer">
+        <Card
+            draggable
+            onDragStart={handleDragStart}
+            className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50"
+            onClick={() => onTaskClick?.(task)}>
             <CardHeader className="p-3 pb-0">
                 <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-sm font-semibold leading-tight">
