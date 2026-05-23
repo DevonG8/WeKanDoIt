@@ -50,11 +50,13 @@ export function TaskCard({
         e.dataTransfer.setData("taskId", task.id.toString());
     };
 
+    const assignedToName = task.profiles?.name || task.assigned_to || null;
+
     return (
         <Card
             draggable
             onDragStart={handleDragStart}
-            className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50"
+            className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50 border"
             onClick={() => onTaskClick?.(task)}>
             <CardHeader className="p-3 pb-0">
                 <div className="flex items-start justify-between gap-2">
@@ -89,7 +91,10 @@ export function TaskCard({
                     {task.assigned_to && (
                         <span className="flex items-center gap-1">
                             <UserIcon size={12} />
-                            Assigned
+                            <span>Assigned to:</span>
+                            <span className="text-primary">
+                                {assignedToName}
+                            </span>
                         </span>
                     )}
                 </div>

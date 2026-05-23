@@ -32,6 +32,9 @@ export interface Task {
     created_at: string;
     status: TaskStatus;
     priority: TaskPriority;
+    profiles?: {
+        name: string | null;
+    };
 }
 
 // values for TaskStatus and TaskPriority

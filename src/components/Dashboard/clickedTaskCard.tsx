@@ -111,7 +111,7 @@ export function ClickedTaskCard({ task, isOpen, onClose }: TaskModalProps) {
                                     Assigned To
                                 </div>
                                 <div className="text-base font-medium">
-                                    {task.assigned_to}
+                                    {task.profiles?.name || task.assigned_to}
                                 </div>
                             </div>
                         )}

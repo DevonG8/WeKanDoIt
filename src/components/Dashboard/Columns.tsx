@@ -61,7 +61,14 @@ export function Columns({ householdId }: ColumnsProps) {
             setLoading(true);
             const { data, error } = await supabase
                 .from("tasks")
-                .select("*")
+                .select(
+                    `
+                    *,
+                    profiles:assigned_to (
+                        name
+                    )
+                `,
+                )
                 .eq("household_id", householdId);
 
             if (error) {
@@ -74,6 +81,53 @@ export function Columns({ householdId }: ColumnsProps) {
 
         fetchTasks();
     }, [householdId]);
+
+    const handleDragOver = (
+        ref: React.RefObject<HTMLDivElement | null>,
+        e: React.DragEvent<HTMLDivElement>,
+    ) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+
+        if (ref.current) {
+            const scrollSpeed = 5;
+            const { top, bottom } = ref.current.getBoundingClientRect();
+
+            if (e.clientY - top < 50) {
+                ref.current.scrollTop -= scrollSpeed;
+            } else if (bottom - e.clientY < 50) {
+                ref.current.scrollTop += scrollSpeed;
+            }
+        }
+    };
+
+    const handleDrop =
+        (newStatus: TaskStatus) =>
+        async (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            const taskId = e.dataTransfer.getData("taskId");
+
+            if (!taskId) return;
+
+            // Update task
+            const { error } = await supabase
+                .from("tasks")
+                .update({ status: newStatus })
+                .eq("id", taskId);
+
+            if (error) {
+                console.error("Error updating task:", error);
+            } else {
+                // Update local
+                setTasks(
+                    tasks.map((task) =>
+                        task.id === taskId
+                            ? { ...task, status: newStatus }
+                            : task,
+                    ),
+                );
+            }
+        };
 
     const backlogTasks = tasks.filter((t) => t.status === TaskStatus.backlog);
     const nextTasks = tasks.filter((t) => t.status === TaskStatus.next);
@@ -124,7 +178,11 @@ export function Columns({ householdId }: ColumnsProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex-1 overflow-y-auto flex flex-col gap-2">
+                    <CardContent
+                        className="flex-1 overflow-y-auto flex flex-col gap-2 max-h-full"
+                        onDragOver={(e) => handleDragOver(backlogRef, e)}
+                        onDragLeave={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(TaskStatus.backlog)(e)}>
                         {backlogTasks.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 No items yet.
@@ -182,26 +240,22 @@ export function Columns({ householdId }: ColumnsProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex-1 overflow-y-auto flex flex-col gap-2">
+                    <CardContent
+                        className="flex-1 overflow-y-auto flex flex-col gap-2 max-h-full"
+                        onDragOver={(e) => handleDragOver(nextRef, e)}
+                        onDragLeave={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(TaskStatus.next)(e)}>
                         {nextTasks.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 No items yet.
                             </p>
                         ) : (
                             nextTasks.map((task) => (
-                                <div
+                                <TaskCard
                                     key={task.id}
-                                    onClick={() => setSelectedTask(task)}
-                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
-                                    <div className="font-semibold">
-                                        {task.title}
-                                    </div>
-                                    {task.description && (
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {task.description}
-                                        </p>
-                                    )}
-                                </div>
+                                    task={task}
+                                    onTaskClick={setSelectedTask}
+                                />
                             ))
                         )}
                     </CardContent>
@@ -249,26 +303,22 @@ export function Columns({ householdId }: ColumnsProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex-1 overflow-y-auto flex flex-col gap-2">
+                    <CardContent
+                        className="flex-1 overflow-y-auto flex flex-col gap-2 max-h-full"
+                        onDragOver={(e) => handleDragOver(inProgressRef, e)}
+                        onDragLeave={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(TaskStatus.inProgress)(e)}>
                         {inProgressTasks.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 No items yet.
                             </p>
                         ) : (
                             inProgressTasks.map((task) => (
-                                <div
+                                <TaskCard
                                     key={task.id}
-                                    onClick={() => setSelectedTask(task)}
-                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
-                                    <div className="font-semibold">
-                                        {task.title}
-                                    </div>
-                                    {task.description && (
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {task.description}
-                                        </p>
-                                    )}
-                                </div>
+                                    task={task}
+                                    onTaskClick={setSelectedTask}
+                                />
                             ))
                         )}
                     </CardContent>
@@ -315,26 +365,22 @@ export function Columns({ householdId }: ColumnsProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex-1 overflow-y-auto flex flex-col gap-2">
+                    <CardContent
+                        className="flex-1 overflow-y-auto flex flex-col gap-2 max-h-full"
+                        onDragOver={(e) => handleDragOver(pendingRef, e)}
+                        onDragLeave={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(TaskStatus.pending)(e)}>
                         {pendingTasks.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 No items yet.
                             </p>
                         ) : (
                             pendingTasks.map((task) => (
-                                <div
+                                <TaskCard
                                     key={task.id}
-                                    onClick={() => setSelectedTask(task)}
-                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
-                                    <div className="font-semibold">
-                                        {task.title}
-                                    </div>
-                                    {task.description && (
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {task.description}
-                                        </p>
-                                    )}
-                                </div>
+                                    task={task}
+                                    onTaskClick={setSelectedTask}
+                                />
                             ))
                         )}
                     </CardContent>
@@ -381,26 +427,22 @@ export function Columns({ householdId }: ColumnsProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex-1 overflow-y-auto flex flex-col gap-2">
+                    <CardContent
+                        className="flex-1 overflow-y-auto flex flex-col gap-2 max-h-full"
+                        onDragOver={(e) => handleDragOver(finishedRef, e)}
+                        onDragLeave={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(TaskStatus.finished)(e)}>
                         {finishedTasks.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 No items yet.
                             </p>
                         ) : (
                             finishedTasks.map((task) => (
-                                <div
+                                <TaskCard
                                     key={task.id}
-                                    onClick={() => setSelectedTask(task)}
-                                    className="rounded-md border p-2 text-sm bg-background cursor-pointer hover:bg-muted transition-colors">
-                                    <div className="font-semibold">
-                                        {task.title}
-                                    </div>
-                                    {task.description && (
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {task.description}
-                                        </p>
-                                    )}
-                                </div>
+                                    task={task}
+                                    onTaskClick={setSelectedTask}
+                                />
                             ))
                         )}
                     </CardContent>
