@@ -137,7 +137,6 @@ export const createReversibleAnimation = (
 // FLIP-based card expansion (like the CodePen example)
 
 let activeCard: HTMLElement | null = null;
-let expandTimeline: gsap.core.Timeline | null = null;
 
 export const animateCardExpand = (
     cardItem: HTMLElement | null,
@@ -241,7 +240,6 @@ export const animateCardExpand = (
     }
 
     activeCard = cardItem;
-    expandTimeline = tl;
 
     // Add click outside to close
     document.addEventListener("click", handleCardClickOutside);
@@ -313,7 +311,6 @@ export const animateCardCollapse = (
     );
 
     activeCard = null;
-    expandTimeline = null;
 
     return tl;
 };
