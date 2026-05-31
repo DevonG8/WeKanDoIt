@@ -5,7 +5,12 @@ import {
     killAllAnimations,
 } from "@/lib/gsapAnimations";
 
-export const useAnimatedColumn = () => {
+/**
+ * Manages a column's open/close animation.
+ * Accepts an optional `onOpen` callback — use it to trigger card entrance
+ * animations after the column finishes opening.
+ */
+export const useAnimatedColumn = (onOpen?: () => void) => {
     const columnRef = useRef<HTMLDivElement>(null);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -15,17 +20,18 @@ export const useAnimatedColumn = () => {
 
         if (isOpen) {
             await animateColumnClose(element);
+            setIsOpen(false);
         } else {
             await animateColumnOpen(element);
+            setIsOpen(true);
+            // Fire card entrance after column has opened
+            onOpen?.();
         }
-        setIsOpen(!isOpen);
-    }, [isOpen]);
+    }, [isOpen, onOpen]);
 
     const reset = useCallback(() => {
         const element = columnRef.current;
-        if (element) {
-            killAllAnimations(element);
-        }
+        if (element) killAllAnimations(element);
         setIsOpen(false);
     }, []);
 

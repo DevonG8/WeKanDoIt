@@ -1,41 +1,67 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import {
-    animateCardsIn,
-    animateCardRemove,
-    killAnimationsOnClass,
-} from "@/lib/gsapAnimations";
+import { useRef, useCallback } from "react";
+import gsap from "gsap";
 
-interface UseTaskCardsOptions {
-    stagger?: number;
-    duration?: number;
-}
+export const useAnimateCards = (staggerIn = 0.05, staggerOut = 0.04) => {
+    const cardsRef = useRef<HTMLDivElement>(null);
 
-export const useTaskCards = (
-    tasks: any[],
-    options: UseTaskCardsOptions = {},
-) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const { stagger = 0.1, duration = 0.4 } = options;
+    // ── Forward Animation ────────────────────────────────────────────────
+    const triggerAnimation = useCallback(() => {
+        const container = cardsRef.current;
+        if (!container) return;
 
-    useGSAP(() => {
-        if (containerRef.current) {
-            const cards = containerRef.current.querySelectorAll(".task-card");
-            if (cards.length > 0) {
-                animateCardsIn(cards, { stagger, duration });
+        const cards = container.querySelectorAll("[data-task-card]");
+        if (!cards.length) return;
+
+        gsap.killTweensOf(cards);
+
+        // Instantly force clear baseline styling values to guarantee predictability
+        gsap.set(cards, { clearProps: "opacity,transform" });
+
+        gsap.fromTo(
+            cards,
+            {
+                opacity: 0,
+                y: 15,
+            },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                stagger: staggerIn,
+                ease: "power2.out",
+                overwrite: "auto",
+            },
+        );
+    }, [staggerIn]);
+
+    // ── Reverse Animation ────────────────────────────────────────────────
+    const triggerReverseAnimation = useCallback(
+        (onComplete?: () => void) => {
+            const container = cardsRef.current;
+            if (!container) return;
+
+            const cards = container.querySelectorAll("[data-task-card]");
+
+            if (!cards.length) {
+                onComplete?.();
+                return;
             }
-        }
-    }, [tasks, stagger, duration]);
 
-    const removeCard = async (cardElement: HTMLElement): Promise<void> => {
-        await animateCardRemove(cardElement, 0.3);
-        cardElement.remove();
-    };
+            gsap.killTweensOf(cards);
 
-    const killAll = () => {
-        killAnimationsOnClass("task-card");
-    };
+            gsap.to(cards, {
+                opacity: 0,
+                y: -15,
+                duration: 0.6,
+                stagger: staggerOut,
+                ease: "power2.in",
+                onComplete: () => {
+                    onComplete?.();
+                },
+            });
+        },
+        [staggerOut],
+    );
 
-    return { containerRef, removeCard, killAll };
+    return { cardsRef, triggerAnimation, triggerReverseAnimation };
 };

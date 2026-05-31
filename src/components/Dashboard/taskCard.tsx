@@ -54,6 +54,7 @@ export function TaskCard({
 
     return (
         <Card
+            data-task-card
             draggable
             onDragStart={handleDragStart}
             className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50 border"

@@ -107,7 +107,15 @@ export function NavUser({ user }: NavUserProps) {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem onClick={() => navigate("/account/settings")} className="cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => navigate("/dashboard")}
+                                className="cursor-pointer">
+                                <CheckCircleIcon className="mr-2 size-4" />
+                                Dashboard{" "}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => navigate("/account/settings")}
+                                className="cursor-pointer">
                                 <CheckCircleIcon className="mr-2 size-4" />
                                 Account Settings
                             </DropdownMenuItem>
