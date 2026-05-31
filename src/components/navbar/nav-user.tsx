@@ -1,5 +1,6 @@
 "use client";
 
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -34,10 +35,11 @@ interface NavUserProps {
 
 export function NavUser({ user }: NavUserProps) {
     const { isMobile } = useSidebar();
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        window.location.href = "/";
+        navigate("/");
     };
 
     // Generates initials (e.g., "John Doe" -> "JD")
@@ -105,9 +107,9 @@ export function NavUser({ user }: NavUserProps) {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate("/account/settings")} className="cursor-pointer">
                                 <CheckCircleIcon className="mr-2 size-4" />
-                                Account
+                                Account Settings
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <BellIcon className="mr-2 size-4" />

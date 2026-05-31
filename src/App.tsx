@@ -3,7 +3,8 @@ import LoginPage from "@/pages/Login";
 import SignupPage from "@/pages/Signup";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/dashboard";
-// add when protected routes are added
+import AccountSettings from "@/pages/AccountSettings";
+
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -39,6 +40,16 @@ export default function App() {
                         <ProtectedRoute>
                             <div className="min-h-screen flex items-center justify-center bg-muted">
                                 <Dashboard />
+                            </div>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/account/settings"
+                    element={
+                        <ProtectedRoute>
+                            <div className="min-h-screen flex items-center justify-center bg-muted">
+                                <AccountSettings />
                             </div>
                         </ProtectedRoute>
                     }
