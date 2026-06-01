@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2Icon } from "lucide-react";
@@ -163,11 +164,11 @@ export function SignupForm({
 
                                 <FieldDescription className="text-center">
                                     Already have an account?{" "}
-                                    <a
-                                        href="/"
+                                    <Link
+                                        to="/"
                                         className="underline hover:text-gold">
                                         Sign in
-                                    </a>
+                                    </Link>
                                 </FieldDescription>
                             </FieldGroup>
                         </form>

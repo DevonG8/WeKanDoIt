@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function LoginForm({
     className,
@@ -149,7 +149,11 @@ export function LoginForm({
                                 </Button>
                                 <FieldDescription className="text-center">
                                     Don&apos;t have an account?{" "}
-                                    <a href="/signup">Sign up</a>
+                                    <Link
+                                        to="/signup"
+                                        className="underline hover:text-primary">
+                                        Sign up
+                                    </Link>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>

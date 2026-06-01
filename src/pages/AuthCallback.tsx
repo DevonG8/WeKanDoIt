@@ -14,7 +14,7 @@ export default function AuthCallback() {
                 navigate("/");
             } else if (event === "INITIAL_SESSION" && !session) {
                 console.log("AuthCallback: No initial session found during callback, navigating back to login.");
-                navigate("/login");
+                navigate("/");
             }
         });
 
