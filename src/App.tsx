@@ -16,19 +16,11 @@ export default function App() {
             <Routes>
                 <Route
                     path="/"
-                    element={
-                        <div className="min-h-screen flex items-center justify-center bg-muted">
-                            <LoginPage />
-                        </div>
-                    }
+                    element={<LoginPage />}
                 />
                 <Route
                     path="/signup"
-                    element={
-                        <div className="min-h-screen flex items-center justify-center bg-muted">
-                            <SignupPage />
-                        </div>
-                    }
+                    element={<SignupPage />}
                 />
                 <Route
                     path="/auth/callback"
@@ -38,9 +30,7 @@ export default function App() {
                     path="/dashboard"
                     element={
                         <ProtectedRoute>
-                            <div className="min-h-screen flex items-center justify-center bg-muted">
-                                <Dashboard />
-                            </div>
+                            <Dashboard />
                         </ProtectedRoute>
                     }
                 />
@@ -48,9 +38,7 @@ export default function App() {
                     path="/account/settings"
                     element={
                         <ProtectedRoute>
-                            <div className="min-h-screen flex items-center justify-center bg-muted">
-                                <AccountSettings />
-                            </div>
+                            <AccountSettings />
                         </ProtectedRoute>
                     }
                 />
