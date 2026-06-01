@@ -26,9 +26,7 @@ interface CardExpandOptions extends AnimationOptions {
     contentSelector?: string;
 }
 
-// ─────────────────────────────────────────────
 // COLUMN ANIMATIONS
-// ─────────────────────────────────────────────
 
 /**
  * Animates a column open from height 0 → auto.
