@@ -31,7 +31,6 @@ export function Columns({ householdId }: ColumnsProps) {
 
     const prevHouseholdId = useRef<string | null>(null);
 
-    // ── Single Hook Instances managing shared ref + triggers ─────────────
     const {
         cardsRef: backlogCardsRef,
         triggerAnimation: animateBacklog,
@@ -62,7 +61,7 @@ export function Columns({ householdId }: ColumnsProps) {
         triggerReverseAnimation: reverseFinished,
     } = useAnimateCards();
 
-    // ── Column open/close hooks ────────────────────────────────────────────
+    //  Column open/close hooks
     const {
         columnRef: backlogRef,
         toggleColumn: toggleBacklog,
@@ -72,24 +71,24 @@ export function Columns({ householdId }: ColumnsProps) {
         columnRef: nextRef,
         toggleColumn: toggleNext,
         isOpen: nextOpen,
-    } = useAnimatedColumn(animateNext);
+    } = useAnimatedColumn(animateNext, true);
     const {
         columnRef: inProgressRef,
         toggleColumn: toggleInProgress,
         isOpen: inProgressOpen,
-    } = useAnimatedColumn(animateInProgress);
+    } = useAnimatedColumn(animateInProgress, true);
     const {
         columnRef: pendingRef,
         toggleColumn: togglePending,
         isOpen: pendingOpen,
-    } = useAnimatedColumn(animatePending);
+    } = useAnimatedColumn(animatePending, true);
     const {
         columnRef: finishedRef,
         toggleColumn: toggleFinished,
         isOpen: finishedOpen,
     } = useAnimatedColumn(animateFinished);
 
-    // ── Fetch tasks ────────────────────────────────────────────────────────
+    //  Fetch tasks
     useEffect(() => {
         async function fetchTasks() {
             if (!householdId) {
@@ -153,11 +152,9 @@ export function Columns({ householdId }: ColumnsProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [householdId]);
 
-    // ── Trigger entry animation ONLY when fresh database tasks load ─────
     useEffect(() => {
         if (loading || isTransitioning) return;
 
-        // Use a standard macro-task timeout to let React completely paint elements
         const timer = setTimeout(() => {
             const ctx = gsap.context(() => {
                 if (backlogOpen) animateBacklog();
@@ -170,10 +167,8 @@ export function Columns({ householdId }: ColumnsProps) {
         }, 30);
 
         return () => clearTimeout(timer);
-        // Explicitly target changes to the incoming dataset identity
     }, [tasks, loading, isTransitioning]);
 
-    // ── Drag helpers ───────────────────────────────────────────────────────
     const handleDragOver = (
         ref: React.RefObject<HTMLDivElement | null>,
         e: React.DragEvent<HTMLDivElement>,
@@ -212,7 +207,6 @@ export function Columns({ householdId }: ColumnsProps) {
             }
         };
 
-    // ── Filtered task lists ────────────────────────────────────────────────
     const backlogTasks = tasks.filter((t) => t.status === TaskStatus.backlog);
     const nextTasks = tasks.filter((t) => t.status === TaskStatus.next);
     const inProgressTasks = tasks.filter(

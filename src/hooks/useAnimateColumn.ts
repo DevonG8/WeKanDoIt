@@ -10,9 +10,9 @@ import {
  * Accepts an optional `onOpen` callback — use it to trigger card entrance
  * animations after the column finishes opening.
  */
-export const useAnimatedColumn = (onOpen?: () => void) => {
+export const useAnimatedColumn = (onOpen?: () => void, initialOpen = false) => {
     const columnRef = useRef<HTMLDivElement>(null);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(initialOpen);
 
     const toggleColumn = useCallback(async () => {
         const element = columnRef.current;
