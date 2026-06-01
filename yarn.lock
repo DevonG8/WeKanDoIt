@@ -274,6 +274,16 @@
   resolved "https://registry.yarnpkg.com/@date-fns/tz/-/tz-1.4.1.tgz#2d905f282304630e07bef6d02d2e7dbf3f0cc4e4"
   integrity sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==
 
+"@dicebear/core@^10.0.1":
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@dicebear/core/-/core-10.0.1.tgz#808bc70c521960180ef68c9d0a235c33fb3d3ada"
+  integrity sha512-EUldm3THEc58Jz2/N8FsqKpgcJmYvjgwnf03EsIvuOVQ+wMad3r0AWwFB242879LMGU1tXqYpeGzcDblhWpTLQ==
+
+"@dicebear/styles@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@dicebear/styles/-/styles-10.0.0.tgz#48e458a0ee937a5b3c5db53a1d9dc8607817540d"
+  integrity sha512-L98E+Am9ZG/nm9I05xthcBbuga/oxA2xkHUgkjcEO9hWzB1LU67pvU2BMrQphVKZ4rnzvLwibURe/41lHMC1/Q==
+
 "@dotenvx/dotenvx@^1.48.4":
   version "1.61.0"
   resolved "https://registry.yarnpkg.com/@dotenvx/dotenvx/-/dotenvx-1.61.0.tgz#fc505cd62f49621407d8893d47444e05d1919c1d"

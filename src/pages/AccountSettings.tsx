@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import ChangeUser from "@/components/Settings/Change-user";
-
+import ChangeAvatar from "@/components/Settings/Change-avatar";
 import {
     Dialog,
     DialogContent,
@@ -32,6 +32,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserIcon } from "lucide-react";
 
 export default function AccountSettings() {
     const { user } = useAuth();
@@ -46,6 +48,7 @@ export default function AccountSettings() {
     });
 
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [isAvatarDialogOpen, setIsAvatarDialogOpen] = React.useState(false);
 
     React.useEffect(() => {
         async function fetchProfile() {
@@ -71,6 +74,11 @@ export default function AccountSettings() {
     const handleUpdateSuccess = (newName: string) => {
         setUserData((prev) => ({ ...prev, name: newName }));
         setIsDialogOpen(false);
+    };
+
+    const handleAvatarUpdateSuccess = (newAvatar: string) => {
+        setUserData((prev) => ({ ...prev, avatar: newAvatar }));
+        setIsAvatarDialogOpen(false);
     };
 
     // Map theme values to display labels
@@ -167,9 +175,42 @@ export default function AccountSettings() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <Button variant="outline">
-                                    Change profile picture
-                                </Button>
+                                <div className="flex items-center gap-6">
+                                    <Avatar className="h-20 w-20 border">
+                                        <AvatarImage src={userData.avatar} />
+                                        <AvatarFallback>
+                                            <UserIcon size={32} />
+                                        </AvatarFallback>
+                                    </Avatar>
+
+                                    <Dialog
+                                        open={isAvatarDialogOpen}
+                                        onOpenChange={setIsAvatarDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline">
+                                                Update Avatar
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-md">
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                    Update Profile Picture
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                    Compare your current avatar
+                                                    with the new one before
+                                                    saving.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <ChangeAvatar
+                                                currentAvatar={userData.avatar}
+                                                onUpdateSuccess={
+                                                    handleAvatarUpdateSuccess
+                                                }
+                                            />
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
                             </CardContent>
                         </Card>
                         <Card className="w-full">
