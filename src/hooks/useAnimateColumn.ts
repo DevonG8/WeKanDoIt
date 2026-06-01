@@ -19,11 +19,14 @@ export const useAnimatedColumn = (onOpen?: () => void, initialOpen = false) => {
         if (!element) return;
 
         if (isOpen) {
-            await animateColumnClose(element);
+            // Start closing animation and update state
+            const animation = animateColumnClose(element);
             setIsOpen(false);
+            await animation;
         } else {
-            await animateColumnOpen(element);
+            // Update state first to trigger width transition, then start content animation
             setIsOpen(true);
+            await animateColumnOpen(element);
             // Fire card entrance after column has opened
             onOpen?.();
         }

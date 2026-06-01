@@ -44,7 +44,7 @@ export const animateColumnOpen = (
     gsap.set(element, { height: 0, opacity: 0, overflow: "hidden" });
 
     return gsap.to(element, {
-        height: "auto",
+        height: "100%",
         opacity: 1,
         duration,
         ease: "expo.inOut",
@@ -113,9 +113,7 @@ export const createColumnTimeline = (
     return tl;
 };
 
-// ─────────────────────────────────────────────
 // TASK CARD ANIMATIONS
-// ─────────────────────────────────────────────
 
 /**
  * Staggers cards in from below with a fade.
@@ -125,7 +123,7 @@ export const animateCardsIn = (
     elements: HTMLElement[] | NodeListOf<Element>,
     options: AnimationOptions = {},
 ): gsap.core.Tween => {
-    const { duration = 0.5, stagger = 0.05, ease = "back.out(1.4)" } = options;
+    const { duration = 0.4, stagger = 0.05, ease = "back.out(1.4)" } = options;
 
     return gsap.from(elements, {
         opacity: 0,
@@ -141,7 +139,7 @@ export const animateCardsIn = (
  */
 export const animateCardRemove = (
     element: HTMLElement | null,
-    duration = 0.3,
+    duration = 0.2,
 ): gsap.core.Tween => {
     if (!element) return gsap.to({}, {});
 
@@ -175,9 +173,7 @@ export const createReversibleAnimation = (
     });
 };
 
-// ─────────────────────────────────────────────
 // FLIP-BASED CARD EXPANSION
-// ─────────────────────────────────────────────
 
 let activeCard: HTMLElement | null = null;
 
@@ -220,11 +216,9 @@ export const animateCardExpand = (
 
     const tl = gsap.timeline();
 
-    // Step 1 & 2: Position detail panel on top of the card, then snapshot that state
     Flip.fit(detailPanel, cardItem, { scale: true });
     const state = Flip.getState(detailPanel);
 
-    // Step 3: Set the final state — centered in viewport
     gsap.set(detailPanel, {
         clearProps: "all",
         position: "fixed",
@@ -237,7 +231,6 @@ export const animateCardExpand = (
         zIndex: 100,
     });
 
-    // Fade out sibling cards
     tl.to(
         allCards,
         {
@@ -389,14 +382,8 @@ export const closeActiveCard = (): gsap.core.Timeline => {
     return animateCardCollapse(detailPanel);
 };
 
-// ─────────────────────────────────────────────
 // DRAGGABLE
-// ─────────────────────────────────────────────
 
-/**
- * Makes a column draggable on the x-axis with inertia.
- * Pass a bounds selector/element to constrain movement.
- */
 export const makeDraggableColumn = (
     element: HTMLElement | null,
     bounds: string | HTMLElement = "body",
@@ -413,10 +400,6 @@ export const makeDraggableColumn = (
     })[0];
 };
 
-/**
- * Makes a card draggable on both axes with inertia.
- * Pass a bounds selector/element to constrain movement.
- */
 export const makeDraggableCard = (
     element: HTMLElement | null,
     bounds: string | HTMLElement = "body",
@@ -433,9 +416,7 @@ export const makeDraggableCard = (
     })[0];
 };
 
-// ─────────────────────────────────────────────
 // MOTION PATH
-// ─────────────────────────────────────────────
 
 export const animateAlongPath = (
     element: HTMLElement | null,
@@ -455,13 +436,8 @@ export const animateAlongPath = (
     });
 };
 
-// ─────────────────────────────────────────────
 // TEXT
-// ─────────────────────────────────────────────
 
-/**
- * Animates a numeric counter from startValue to endValue.
- */
 export const animateTextCount = (
     element: HTMLElement | null,
     startValue: number,
@@ -482,9 +458,7 @@ export const animateTextCount = (
     });
 };
 
-// ─────────────────────────────────────────────
 // UTILITIES
-// ─────────────────────────────────────────────
 
 export const killAllAnimations = (element: HTMLElement | null): void => {
     if (!element) return;

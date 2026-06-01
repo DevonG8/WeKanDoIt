@@ -57,7 +57,7 @@ export function TaskCard({
             data-task-card
             draggable
             onDragStart={handleDragStart}
-            className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50 border"
+            className="w-full shadow-none hover:shadow-md transition-shadow cursor-pointer active:opacity-50 border opacity-0"
             onClick={() => onTaskClick?.(task)}>
             <CardHeader className="p-3 pb-0">
                 <div className="flex items-start justify-between gap-2">

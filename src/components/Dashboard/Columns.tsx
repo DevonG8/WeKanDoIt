@@ -221,7 +221,7 @@ export function Columns({ householdId }: ColumnsProps) {
         }`;
 
     const columnInner = (isOpen: boolean) =>
-        `flex flex-col h-full transition-opacity duration-200 ${
+        `flex flex-col h-full ${
             isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`;
 
