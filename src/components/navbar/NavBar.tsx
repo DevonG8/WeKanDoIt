@@ -36,6 +36,7 @@ interface HouseholdMemberResponse {
     households: {
         id: string;
         name: string;
+        invite_code: string | null;
         household_members: { user_id: string }[];
     } | null;
 }
@@ -77,6 +78,7 @@ export function AppSidebar({
         households (
           id,
           name,
+          invite_code,
           household_members ( user_id )
         )
       `,
@@ -95,6 +97,7 @@ export function AppSidebar({
             .map((row) => ({
                 id: row.households!.id,
                 name: row.households!.name,
+                invite_code: row.households!.invite_code ?? undefined,
                 member_count: row.households!.household_members.length,
             }));
 
