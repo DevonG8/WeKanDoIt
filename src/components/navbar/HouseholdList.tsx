@@ -15,6 +15,7 @@ import {
     SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 export interface Household {
     id: string;
@@ -51,7 +52,10 @@ export function Households({ households, selectedId, onSelect }: HouseholdsProps
                                         <SidebarMenuButton
                                             isActive={selectedId === household.id}
                                             onClick={() => onSelect(household.id)}>
-                                            <div className="group/calendar-item flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground">
+                                            <div className={cn(
+                                                "group/calendar-item flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground transition-colors",
+                                                selectedId === household.id && "bg-sidebar-primary border-sidebar-primary"
+                                            )}>
                                                 {selectedId === household.id && (
                                                     <CheckIcon className="size-3" />
                                                 )}

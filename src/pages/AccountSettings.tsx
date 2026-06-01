@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserIcon } from "lucide-react";
+import { DeleteTasks, DeleteAccount } from "@/components/Settings/Delete-data";
 
 export default function AccountSettings() {
     const { user } = useAuth();
@@ -114,7 +115,8 @@ export default function AccountSettings() {
                         <h1 className="text-2xl font-bold mb-2">
                             Account Settings
                         </h1>
-                        {/* name change */}
+
+                        {/* Username Card */}
                         <Card className="w-full">
                             <CardHeader>
                                 <CardTitle>Change Username</CardTitle>
@@ -166,7 +168,8 @@ export default function AccountSettings() {
                                 </div>
                             </CardContent>
                         </Card>
-                        {/* addprofile picture, blocking/unadding, wipe all tasks button */}
+
+                        {/* Avatar Card */}
                         <Card className="w-full">
                             <CardHeader>
                                 <CardTitle>Change Profile Picture</CardTitle>
@@ -213,19 +216,11 @@ export default function AccountSettings() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Theme Preferences Card */}
                         <Card className="w-full">
                             <CardHeader>
-                                <CardTitle>Blocked Users</CardTitle>
-                                <CardDescription>
-                                    Block and manage users you have blocked.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent></CardContent>
-                        </Card>
-                        {/* theme change  */}
-                        <Card className="w-full">
-                            <CardHeader>
-                                <CardTitle>color Preferences</CardTitle>
+                                <CardTitle>Color Preferences</CardTitle>
                                 <CardDescription>
                                     Set your preferred color scheme for the
                                     application.
@@ -261,20 +256,37 @@ export default function AccountSettings() {
                                 </DropdownMenu>
                             </CardContent>
                         </Card>
-                        {/* Delete Account */}
-                        <Card className="w-full">
-                            <CardHeader>
-                                <CardTitle>Change Username</CardTitle>
-                                <CardDescription>
-                                    Update your username.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button variant="outline">
-                                    {`Delete Account ${username}`}
-                                </Button>
-                            </CardContent>
-                        </Card>
+                        <div className="flex flex-col gap-4">
+                            <Card className="w-full border-destructive/20 bg-destructive/5">
+                                <CardHeader>
+                                    <CardTitle className="text-destructive">
+                                        Wipe Task Data
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Permanently delete every task you have
+                                        created across all households.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <DeleteTasks />
+                                </CardContent>
+                            </Card>
+
+                            <Card className="w-full border-destructive/20 bg-destructive/5">
+                                <CardHeader>
+                                    <CardTitle className="text-destructive">
+                                        Delete Account
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Permanently remove your profile and data
+                                        from the platform.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <DeleteAccount />
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </main>
