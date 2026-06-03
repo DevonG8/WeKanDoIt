@@ -26,7 +26,6 @@ export function Columns({ householdId }: ColumnsProps) {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-    // Tracks if we are currently running an exit transition
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     const prevHouseholdId = useRef<string | null>(null);
@@ -145,7 +144,7 @@ export function Columns({ householdId }: ColumnsProps) {
             }
 
             setLoading(false);
-            setIsTransitioning(false); // Transitions are complete
+            setIsTransitioning(false);
         }
 
         fetchTasks();
@@ -233,7 +232,7 @@ export function Columns({ householdId }: ColumnsProps) {
                     <button
                         onClick={toggleBacklog}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
-                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-secondary group-hover:text-foreground transition-colors">
                             Backlog ({backlogTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
@@ -286,7 +285,7 @@ export function Columns({ householdId }: ColumnsProps) {
                     <button
                         onClick={toggleNext}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
-                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-secondary group-hover:text-foreground transition-colors">
                             Next ({nextTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
@@ -340,7 +339,7 @@ export function Columns({ householdId }: ColumnsProps) {
                     <button
                         onClick={toggleInProgress}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
-                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-secondary group-hover:text-foreground transition-colors">
                             In Progress ({inProgressTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
@@ -394,7 +393,7 @@ export function Columns({ householdId }: ColumnsProps) {
                     <button
                         onClick={togglePending}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
-                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-secondary group-hover:text-foreground transition-colors">
                             Pending Review ({pendingTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>
@@ -448,7 +447,7 @@ export function Columns({ householdId }: ColumnsProps) {
                     <button
                         onClick={toggleFinished}
                         className="absolute inset-0 flex items-center justify-center w-full h-full hover:bg-muted transition-colors group bg-primary">
-                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="-rotate-90 whitespace-nowrap text-sm font-semibold tracking-wide text-secondary group-hover:text-foreground transition-colors">
                             Finished ({finishedTasks.length}){" "}
                             {loading ? "Getting Tasks..." : "Tasks"}
                         </span>

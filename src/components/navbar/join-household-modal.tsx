@@ -41,7 +41,7 @@ export function JoinHouseholdModal({
             let householdQuery = supabase.from("households").select("id");
 
             if (link) {
-                householdQuery = householdQuery.eq("invite_code", link);
+                householdQuery = householdQuery.eq("invite_code", link.trim());
             } else {
                 householdQuery = householdQuery.ilike("name", name);
             }
