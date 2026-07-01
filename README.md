@@ -1,11 +1,11 @@
 # WeKanDoIt
 
-WeKanDoIt is a modern web application built with React, TypeScript, and Supabase, designed to provide a robust and scalable platform for [**_Insert Project Purpose Here_**]. It leverages cutting-edge technologies to deliver a fast, responsive, and secure user experience.
+WeKanDoIt is a modern web application built with React, TypeScript, and Supabase, designed to provide a platform for Households and Dorms to easily navigate task management.
 
 ## Features
 
 *   **User Authentication:** Secure user registration, login, and session management powered by Supabase Auth.
-*   **Protected Routes:** Ensures only authenticated users can access specific parts of the application.
+*   **Protected Routes:** Ensure only authenticated users can access specific parts of the application.
 *   **Data Management:** Efficient data fetching and caching using React Query.
 *   **Component-Based Architecture:** Built with reusable React components for maintainability and scalability.
 *   **TypeScript:** Enhances code quality and developer experience with static type checking.
@@ -91,7 +91,6 @@ This will start the development server, usually accessible at `http://localhost:
 
 ## Contributing
 
-[**_Add Contribution Guidelines Here_**]
 
 ## License
 
